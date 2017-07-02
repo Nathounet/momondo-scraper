@@ -6,14 +6,12 @@ from flight import Flight
 from pprint import pprint
 
 # Parameters
-departure = 'PAR'
-arrival = 'TPE'
-dep_date_min = '01-01-2018'
-dep_date_max = '02-01-2018'
-ret_date_min = '10-01-2018'
-ret_date_max = '11-01-2018'
-length_min = '9'
-length_max = '20'
+departure = 'TPE'
+arrival = 'DPS'
+dep_date_min = '30-11-2017'
+dep_date_max = '01-12-2017'
+ret_date_min = '10-12-2017'
+ret_date_max = '11-12-2017'
 direct = 'false'
 
 path_to_chromedriver = '/Users/Nathan/Nextcloud/Git_Dev/momondo-scraper/chromedriver'
@@ -93,8 +91,6 @@ def scrap(url):
     scrapedFlight.bestdeal_price = int(element.text)
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
     scrapedFlight.bestdeal_duration = Time(element.text)
-    #print scrapedFlight.price
-    #print scrapedFlight.duration
 
 dep_date_min = Date(dep_date_min)
 dep_date_max = Date(dep_date_max)
