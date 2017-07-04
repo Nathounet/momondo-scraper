@@ -1,20 +1,21 @@
-# Libraries
+### Libraries
 import platform, sys
 from time import sleep
-from datetime import datetime
 from copy import deepcopy
 from pprint import pprint
+from datetime import datetime
 from selenium import webdriver
+from ConfigParser import ConfigParser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Modules
+### Custom modules
 from date_time import Date, Time
 from flight import Flight
 from url import URL
 
-# Parameters
+### Parameters
 path_config_file = './search.conf'
 if platform.system() == 'Darwin':
     path_to_chromedriver = './webdriver/chromedriver'
@@ -23,15 +24,18 @@ elif platform.system() == 'Windows':
 else:
     sys.exit('Unsupported platform yet')
 
-# Initialize
+### Initialize
 browser = webdriver.Chrome(executable_path = path_to_chromedriver)
 url = URL(path_config_file)
 
-# Globals
-dep_date_min = Date(dep_date_min)
-dep_date_max = Date(dep_date_max)
-ret_date_min = Date(ret_date_min)
-ret_date_max = Date(ret_date_max)
+### Globals
+# Get date ranges from config
+config_file = ConfigParser()
+config_file.read(path_config_file)
+dep_date_min = Date(config_file.get('Dates', 'DepartureDate_Min'))
+dep_date_max = Date(config_file.get('Dates', 'DepartureDate_Max'))
+ret_date_min = Date(config_file.get('Dates', 'ReturnDate_Min'))
+ret_date_max = Date(config_file.get('Dates', 'ReturnDate_Max'))
 global results, everyReturnCombination, scrapedFlight
 results = []
 everyReturnCombination = []
@@ -109,3 +113,5 @@ if "__main__" == __name__:
     print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
 
     quit()
+
+#TODO: Make the scrapping part a thread to process multiple date at same time (might need multiple webdriver instances)
