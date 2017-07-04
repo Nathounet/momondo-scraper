@@ -1,44 +1,29 @@
 # Libraries
-from selenium import webdriver
+import platform
 from time import sleep
+from datetime import datetime
 from copy import deepcopy
 from pprint import pprint
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Modules
 from date_time import Date, Time
 from flight import Flight
+from url import URL
 
 # Parameters
-departure = 'TPE'
-arrival = 'DPS'
-dep_date_min = '30-11-2017'
-dep_date_max = '01-12-2017'
-ret_date_min = '10-12-2017'
-ret_date_max = '11-12-2017'
-direct = 'false'
-path_to_chromedriver = '/Users/Nathan/Nextcloud/Git_Dev/momondo-scraper/chromedriver'
+path_config_file = './search.conf'
+if platform.system() == 'Darwin':
+    path_to_chromedriver = './webdriver/chromedriver'
+elif platform.system() == 'Windows':
+    path_to_chromedriver = './webdriver/chromedriver.exe'
 
 # Initialize
 browser = webdriver.Chrome(executable_path = path_to_chromedriver)
-TripType = '&TripType=2'
-SegNo = '&SegNo=2'
-SO0 = '&SO0='
-SD0 = '&SD0='
-SDP0 = '&SDP0='
-SO1 = '&SO1='
-SD1 = '&SD1='
-SDP1 = '&SDP1='
-AD = '&AD=1'
-TK = '&TK=ECO'
-DO = '&DO='
-NA = '&NA=false'
-
-# Update with parameters
-SO0 += departure
-SD0 += arrival
-SO1 += arrival
-SD1 += departure
-DO += direct
+url = URL(path_config_file)
 
 # Globals
 dep_date_min = Date(dep_date_min)
@@ -66,7 +51,8 @@ def forEachReturnDate(dep_date):
     everyReturnCombination = []
     ret_date = Date(str(ret_date_min))
     while not ret_date.exceeds(ret_date_max):
-        createUrl(dep_date, ret_date)
+        url.setDates(dep_date, ret_date)
+        scrap(url.getFullUrl())
         scrapedFlight.departure = dep_date
         scrapedFlight.arrival =ret_date
         print scrapedFlight
@@ -74,20 +60,14 @@ def forEachReturnDate(dep_date):
         ret_date.incDay()
 
 # 3
-def createUrl(dep_date, ret_date):
-    print str(dep_date), '>', str(ret_date)
-    SDP0 = '&SDP0=' + str(dep_date)
-    SDP1 = '&SDP1=' + str(ret_date)
-    url = 'https://www.momondo.fr/flightsearch?Search=true'
-    url += TripType + SegNo + SO0 + SD0 + SDP0 + SO1 + SD1 + SDP1 + AD + TK + DO + NA
-    scrap(url)
-
-# 4
-def scrap(url):
+def scrap(fixed_url):
     global scrapedFlight
-    browser.get(url)
-    while not isSearchFinished():
-        sleep(1)
+    browser.get(fixed_url)
+
+    # Wait for the search to be finished (100s)
+    element = WebDriverWait(browser, 100).until(
+        EC.presence_of_element_located((By.CLASS_NAME, 'search-completed'))
+    )
 
     element = browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
     scrapedFlight.cheapest_price = int(element.text)
@@ -98,7 +78,7 @@ def scrap(url):
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
     scrapedFlight.bestdeal_duration = Time(element.text)
 
-# 4.1
+# 3.1
 def isSearchFinished():
     try:
         searchStatus = browser.find_element_by_xpath('//*[@id="searchProgressText"]')
@@ -111,7 +91,19 @@ def isSearchFinished():
 
 # 0
 if "__main__" == __name__:
+    start = datetime.now()
+
     forEachDepartureDate()
-    print 'Done.'
     pprint(results)
+
+    end = datetime.now()
+
+    time_elapsed = end - start
+    seconds = int(time_elapsed.total_seconds())
+    hours = int(seconds / 3600)
+    seconds = seconds - hours*3600
+    minutes = int(seconds / 60)
+    seconds = seconds - minutes*60
+    print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
+
     quit()
