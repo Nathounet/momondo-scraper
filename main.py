@@ -44,7 +44,7 @@ scrapedFlight = Flight()
 # 1
 def forEachDepartureDate():
     global results, everyReturnCombination
-    dep_date = Date(str(dep_date_min))
+    dep_date = Date(dep_date_min)
     while not dep_date.exceeds(dep_date_max):
         forEachReturnDate(dep_date)
         results.append(deepcopy(everyReturnCombination))
@@ -55,12 +55,12 @@ def forEachDepartureDate():
 def forEachReturnDate(dep_date):
     global everyReturnCombination, scrapedFlight
     everyReturnCombination = []
-    ret_date = Date(str(ret_date_min))
+    ret_date = Date(ret_date_min)
     while not ret_date.exceeds(ret_date_max):
         url.setDates(dep_date, ret_date)
         scrap(url.getFullUrl())
         scrapedFlight.departure = dep_date
-        scrapedFlight.arrival =ret_date
+        scrapedFlight.arrival = ret_date
         print scrapedFlight
         everyReturnCombination.append(deepcopy(scrapedFlight))
         ret_date.incDay()
@@ -83,6 +83,17 @@ def scrap(fixed_url):
     scrapedFlight.bestdeal_price = int(element.text)
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
     scrapedFlight.bestdeal_duration = Time(element.text)
+
+# 3.1
+def isSearchFinished():
+    try:
+        searchStatus = browser.find_element_by_xpath('//*[@id="searchProgressText"]')
+        if 'Recherche termin' in searchStatus.text:
+            return True
+        else:
+            return False
+    except:
+        return False
 
 # 0
 if "__main__" == __name__:
