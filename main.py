@@ -114,4 +114,8 @@ if "__main__" == __name__:
 
     quit()
 
-#TODO: Make the scrapping part a thread to process multiple date at same time (might need multiple webdriver instances)
+
+#TODO+ Find lowest price in Cheapest and lowest duration in BestDeal for every departure date and every arrival date
+#       Create a list for each (4 lists: cheapest_departure, shortest_departure, cheapest_arrival, shortest_arrival)
+#       Plot cheapest and shortest on same graph showing both price and duration for cheapest_ and shortest_
+#TODO- Make the scrapping part a thread to process multiple date at same time (might need multiple webdriver instances)
