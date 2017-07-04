@@ -1,5 +1,5 @@
 # Libraries
-import platform
+import platform, sys
 from time import sleep
 from datetime import datetime
 from copy import deepcopy
@@ -20,6 +20,8 @@ if platform.system() == 'Darwin':
     path_to_chromedriver = './webdriver/chromedriver'
 elif platform.system() == 'Windows':
     path_to_chromedriver = './webdriver/chromedriver.exe'
+else:
+    sys.exit('Unsupported platform yet')
 
 # Initialize
 browser = webdriver.Chrome(executable_path = path_to_chromedriver)
