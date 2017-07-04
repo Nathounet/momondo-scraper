@@ -100,6 +100,11 @@ if "__main__" == __name__:
     start = datetime.now()
 
     forEachDepartureDate()
+<<<<<<< HEAD
+=======
+    print 'Done.'
+    #TODO: Add elapsed time
+>>>>>>> master
     pprint(results)
 
     end = datetime.now()
