@@ -113,5 +113,6 @@ def isSearchFinished():
 if "__main__" == __name__:
     forEachDepartureDate()
     print 'Done.'
+    #TODO: Add elapsed time
     pprint(results)
     quit()
