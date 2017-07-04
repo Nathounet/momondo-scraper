@@ -84,17 +84,6 @@ def scrap(fixed_url):
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
     scrapedFlight.bestdeal_duration = Time(element.text)
 
-# 3.1
-def isSearchFinished():
-    try:
-        searchStatus = browser.find_element_by_xpath('//*[@id="searchProgressText"]')
-        if 'Recherche termin' in searchStatus.text:
-            return True
-        else:
-            return False
-    except:
-        return False
-
 # 0
 if "__main__" == __name__:
     start = datetime.now()
