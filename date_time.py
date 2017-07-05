@@ -10,7 +10,7 @@ class Time():
         return 'Time '+str(self)
 
     def __str__(self):
-        return str(self.hours)+'h'+str(self.minutes)+'m'
+        return "%02dh%02dm" % (self.hours, self.minutes)
 
 class Date():
     def __init__(self, s):
@@ -23,7 +23,7 @@ class Date():
         return 'Date '+str(self)
 
     def __str__(self):
-        return str(self.day) + '-' + str(self.month) + '-' + str(self.year)
+        return "%02d-%02d-%02d" % (self.day, self.month, self.year)
 
     def incDay(self):
         if self.month in [1, 3, 5, 7, 8, 10, 12]:
