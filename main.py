@@ -3,6 +3,7 @@ import platform, sys
 from time import sleep
 from copy import deepcopy
 from pprint import pprint
+from random import random
 from datetime import datetime
 from selenium import webdriver
 from ConfigParser import ConfigParser
@@ -64,6 +65,7 @@ def forEachReturnDate(dep_date):
         print scrapedFlight
         everyReturnCombination.append(deepcopy(scrapedFlight))
         ret_date.incDay()
+        time.sleep(5 + (random() * 5)) # wait between 5 and 10s between each search to make it less boty
 
 # 3
 def scrap(fixed_url):
@@ -83,17 +85,6 @@ def scrap(fixed_url):
     scrapedFlight.bestdeal_price = int(element.text)
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
     scrapedFlight.bestdeal_duration = Time(element.text)
-
-# 3.1
-def isSearchFinished():
-    try:
-        searchStatus = browser.find_element_by_xpath('//*[@id="searchProgressText"]')
-        if 'Recherche termin' in searchStatus.text:
-            return True
-        else:
-            return False
-    except:
-        return False
 
 # 0
 if "__main__" == __name__:
