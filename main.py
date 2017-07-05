@@ -45,7 +45,7 @@ scrapedFlight = Flight()
 # 1
 def forEachDepartureDate():
     global results, everyReturnCombination
-    dep_date = Date(dep_date_min)
+    dep_date = deepcopy(dep_date_min)
     while not dep_date.exceeds(dep_date_max):
         forEachReturnDate(dep_date)
         results.append(deepcopy(everyReturnCombination))
@@ -56,16 +56,19 @@ def forEachDepartureDate():
 def forEachReturnDate(dep_date):
     global everyReturnCombination, scrapedFlight
     everyReturnCombination = []
-    ret_date = Date(ret_date_min)
+    ret_date = deepcopy(ret_date_min)
     while not ret_date.exceeds(ret_date_max):
         url.setDates(dep_date, ret_date)
         scrap(url.getFullUrl())
-        scrapedFlight.departure = dep_date
-        scrapedFlight.arrival = ret_date
+        scrapedFlight.departure_date = dep_date
+        scrapedFlight.return_date = ret_date
         print scrapedFlight
         everyReturnCombination.append(deepcopy(scrapedFlight))
         ret_date.incDay()
-        time.sleep(5 + (random() * 5)) # wait between 5 and 10s between each search to make it less boty
+        # Wait between 5 and 9.7s between each search to make it less boty
+        seconds = 5 + (random() * 4) + (random() * 0.7)
+        print 'Sleeping for %.2f seconds...' % (seconds)
+        sleep(seconds)
 
 # 3
 def scrap(fixed_url):
@@ -106,7 +109,7 @@ if "__main__" == __name__:
     quit()
 
 
-#TODO+ Find lowest price in Cheapest and lowest duration in BestDeal for every departure date and every arrival date
-#       Create a list for each (4 lists: cheapest_departure, shortest_departure, cheapest_arrival, shortest_arrival)
+#TODO+ Find lowest price in Cheapest and lowest duration in BestDeal for every departure date and every return date
+#       Create a list for each (4 lists: cheapest_departure, shortest_departure, cheapest_return, shortest_return)
 #       Plot cheapest and shortest on same graph showing both price and duration for cheapest_ and shortest_
 #TODO- Make the scrapping part a thread to process multiple date at same time (might need multiple webdriver instances)
