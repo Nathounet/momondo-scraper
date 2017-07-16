@@ -4,7 +4,7 @@ from time import sleep
 from copy import deepcopy
 from pprint import pprint
 from random import random
-from datetime import datetime
+from datetime import datetime, timedelta, time
 from selenium import webdriver
 from ConfigParser import ConfigParser
 from selenium.webdriver.common.by import By
@@ -12,7 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 ### Custom modules
-from date_time import Date, Time
 from flight import Flight
 from url import URL
 
@@ -33,10 +32,10 @@ url = URL(path_config_file)
 # Get date ranges from config
 config_file = ConfigParser()
 config_file.read(path_config_file)
-dep_date_min = Date(config_file.get('Dates', 'DepartureDate_Min'))
-dep_date_max = Date(config_file.get('Dates', 'DepartureDate_Max'))
-ret_date_min = Date(config_file.get('Dates', 'ReturnDate_Min'))
-ret_date_max = Date(config_file.get('Dates', 'ReturnDate_Max'))
+dep_date_min = datetime.strptime(config_file.get('Dates', 'DepartureDate_Min'), '%d-%m-%Y')
+dep_date_max = datetime.strptime(config_file.get('Dates', 'DepartureDate_Max'), '%d-%m-%Y')
+ret_date_min = datetime.strptime(config_file.get('Dates', 'ReturnDate_Min'), '%d-%m-%Y')
+ret_date_max = datetime.strptime(config_file.get('Dates', 'ReturnDate_Max'), '%d-%m-%Y')
 global results, everyReturnCombination, scrapedFlight
 results = []
 everyReturnCombination = []
@@ -46,25 +45,25 @@ scrapedFlight = Flight()
 def forEachDepartureDate():
     global results, everyReturnCombination
     dep_date = deepcopy(dep_date_min)
-    while not dep_date.exceeds(dep_date_max):
+    while not dep_date > dep_date_max:
         forEachReturnDate(dep_date)
         results.append(deepcopy(everyReturnCombination))
         pprint(everyReturnCombination)
-        dep_date.incDay()
+        dep_date += timedelta(days=1)
 
 # 2
 def forEachReturnDate(dep_date):
     global everyReturnCombination, scrapedFlight
     everyReturnCombination = []
     ret_date = deepcopy(ret_date_min)
-    while not ret_date.exceeds(ret_date_max):
-        url.setDates(dep_date, ret_date)
+    while not ret_date > ret_date_max:
+        url.setDates(dep_date.strftime('%d-%m-%Y'), ret_date.strftime('%d-%m-%Y'))
         scrap(url.getFullUrl())
         scrapedFlight.departure_date = dep_date
         scrapedFlight.return_date = ret_date
         print scrapedFlight
         everyReturnCombination.append(deepcopy(scrapedFlight))
-        ret_date.incDay()
+        ret_date += timedelta(days=1)
         # Wait between 5 and 9.7s between each search to make it less boty
         seconds = 5 + (random() * 4) + (random() * 0.7)
         print 'Sleeping for %.2f seconds...' % (seconds)
@@ -83,17 +82,18 @@ def scrap(fixed_url):
     element = browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
     scrapedFlight.cheapest_price = int(element.text)
     element = browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[3]')
-    scrapedFlight.cheapest_duration = Time(element.text)
+    scrapedFlight.cheapest_duration = datetime.strptime(element.text, '%Hh%Mm (Moyenne)')
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[2]/span[1]')
     scrapedFlight.bestdeal_price = int(element.text)
     element = browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
-    scrapedFlight.bestdeal_duration = Time(element.text)
+    scrapedFlight.bestdeal_duration = datetime.strptime(element.text, '%Hh%Mm (Moyenne)')
 
 # 0
 if "__main__" == __name__:
     start = datetime.now()
 
     forEachDepartureDate()
+    print '\n######## RESULTS ########'
     pprint(results)
 
     end = datetime.now()

@@ -11,4 +11,4 @@ class Flight():
         return 'Flight '+str(self)
 
     def __str__(self):
-        return 'From '+str(self.departure_date)+' to '+str(self.return_date)+': Cheapest['+str(self.cheapest_price)+';'+str(self.cheapest_duration)+']'+' BestDeal['+str(self.bestdeal_price)+';'+str(self.bestdeal_duration)+']'
+        return 'From '+self.departure_date.strftime('%d-%m-%Y')+' to '+self.return_date.strftime('%d-%m-%Y')+': Cheapest['+str(self.cheapest_price)+';'+self.cheapest_duration.strftime('%H:%M')+']'+' BestDeal['+str(self.bestdeal_price)+';'+self.bestdeal_duration.strftime('%H:%M')+']'
