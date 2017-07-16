@@ -3,7 +3,7 @@ from time import sleep
 from copy import deepcopy
 from pprint import pprint
 from random import random
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -12,13 +12,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 ### Custom modules
 from url import URL
+from shorttime import Time
 from config import Config
 from flight import Flight
+from csvwriter import CsvWriter
+from autotest import AutoTest
+#from plot import Plot
 
 
 class Scraper():
     def __init__(self, path_config_file, path_to_webdriver):
-        self.results = []
+        self.results_dep = []
+        self.results_ret = []
         self.everyReturnCombination = []
         self.scrapedFlight = Flight()
         self.config_parameters = Config(path_config_file)
@@ -41,9 +46,18 @@ class Scraper():
     def main(self):
         start = datetime.now()
 
-        self.forEachDepartureDate()
-        print '\n######## RESULTS ########'
-        pprint(self.results)
+#        self.forEachDepartureDate()
+
+        AutoTest(self.results_dep)
+
+        self.createReturnResults()
+        print len(self.results_dep)
+        print len(self.results_ret)
+        print type(self.results_dep[1]), type(self.results_dep[1][1])
+        print self.results_dep[1][1].cheapest_price
+        self.printResults()
+        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
+#        Plot(self.config_parameters, self.results_dep, self.results_ret)
 
         end = datetime.now()
 
@@ -61,7 +75,7 @@ class Scraper():
         dep_date = deepcopy(self.config_parameters.dep_date_min)
         while not dep_date > self.config_parameters.dep_date_max:
             self.forEachReturnDate(dep_date)
-            self.results.append(deepcopy(self.everyReturnCombination))
+            self.results_dep.append(deepcopy(self.everyReturnCombination))
             pprint(self.everyReturnCombination)
             dep_date += timedelta(days=1)
 
@@ -98,12 +112,28 @@ class Scraper():
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
         self.scrapedFlight.cheapest_price = int(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[3]')
-        self.scrapedFlight.cheapest_duration = datetime.strptime(element.text, '%Hh%Mm (Moyenne)')
+        self.scrapedFlight.cheapest_duration = Time(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[2]/span[1]')
         self.scrapedFlight.bestdeal_price = int(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
-        self.scrapedFlight.bestdeal_duration = datetime.strptime(element.text, '%Hh%Mm (Moyenne)')
+        self.scrapedFlight.bestdeal_duration = Time(element.text)
 
+
+    def createReturnResults(self):
+        # Reverse list order to sort returns flights
+        for nb_dep, everyReturnList in enumerate(self.results_dep):
+            for nb_ret, everyReturnFlight in enumerate(everyReturnList):
+                if nb_dep == 0:
+                    self.results_ret.append([])
+                self.results_ret[nb_ret].append(deepcopy(everyReturnFlight))
+
+
+    def printResults(self):
+        print '\n######## RESULTS ########'
+        print '--- DEPARTURES ---'
+        pprint(self.results_dep)
+        print '\n--- RETURNS ---'
+        pprint(self.results_ret)
 
 #TODO+ Find lowest price in Cheapest and lowest duration in BestDeal for every departure date and every return date
 #       Create a list for each (4 lists: cheapest_departure, shortest_departure, cheapest_return, shortest_return)
