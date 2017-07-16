@@ -22,7 +22,7 @@ from scraper import Scraper
 ### Parameters
 path_config_file = './search.conf'
 path_to_webdriver_dir = './webdriver/' # ends with /
-name_of_webdriver = 'phantomjs' # chromedriver OR phantomjs
+name_of_webdriver = 'chromedriver' # chromedriver OR phantomjs
 path_to_webdriver = ''
 
 if platform.system() == 'Darwin':

@@ -88,11 +88,12 @@ class Scraper():
 
         try:
             # Wait for the search to be finished (100s)
-            element = WebDriverWait(self.browser, 30).until(
+            element = WebDriverWait(self.browser, 100).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'search-completed')))
         except:
             self.browser.save_screenshot('out.png');
             self.browser.quit()
+            assert 2==1
 
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
         self.scrapedFlight.cheapest_price = int(element.text)
