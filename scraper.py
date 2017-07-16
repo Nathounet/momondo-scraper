@@ -5,35 +5,37 @@ from pprint import pprint
 from random import random
 from datetime import datetime, timedelta, time
 from selenium import webdriver
-from ConfigParser import ConfigParser
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+
 
 ### Custom modules
-from flight import Flight
 from url import URL
+from config import Config
+from flight import Flight
 
 
 class Scraper():
-    def __init__(self, path_config_file, path_to_chromedriver):
-        self.getConfig(path_config_file)
-        self.url = URL(path_config_file)
-
-        self.browser = webdriver.Chrome(executable_path = path_to_chromedriver)
+    def __init__(self, path_config_file, path_to_webdriver):
         self.results = []
         self.everyReturnCombination = []
         self.scrapedFlight = Flight()
+        self.config_parameters = Config(path_config_file)
+        self.url = URL(self.config_parameters)
+        self.initWebdriver(path_to_webdriver)
 
 
-    def getConfig(self, path_config_file):
-        # Get date ranges from config
-        config_file = ConfigParser()
-        config_file.read(path_config_file)
-        self.dep_date_min = datetime.strptime(config_file.get('Dates', 'DepartureDate_Min'), '%d-%m-%Y')
-        self.dep_date_max = datetime.strptime(config_file.get('Dates', 'DepartureDate_Max'), '%d-%m-%Y')
-        self.ret_date_min = datetime.strptime(config_file.get('Dates', 'ReturnDate_Min'), '%d-%m-%Y')
-        self.ret_date_max = datetime.strptime(config_file.get('Dates', 'ReturnDate_Max'), '%d-%m-%Y')
+    def initWebdriver(self, path_to_webdriver):
+        if path_to_webdriver.endswith('phantomjs'):
+            dcap = dict(webdriver.DesiredCapabilities.PHANTOMJS)
+            dcap["phantomjs.page.settings.userAgent"] = (
+                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                 "(KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36")
+            self.browser = webdriver.PhantomJS(executable_path = path_to_webdriver, desired_capabilities = dcap)
+        else: #chromedriver
+            self.browser = webdriver.Chrome(executable_path = path_to_webdriver)
+        self.browser.set_window_size(400, 700)
 
 
     def main(self):
@@ -52,11 +54,12 @@ class Scraper():
         minutes = int(seconds / 60)
         seconds = seconds - minutes*60
         print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
+        self.browser.quit()
 
     # 1
     def forEachDepartureDate(self):
-        dep_date = deepcopy(self.dep_date_min)
-        while not dep_date > self.dep_date_max:
+        dep_date = deepcopy(self.config_parameters.dep_date_min)
+        while not dep_date > self.config_parameters.dep_date_max:
             self.forEachReturnDate(dep_date)
             self.results.append(deepcopy(self.everyReturnCombination))
             pprint(self.everyReturnCombination)
@@ -65,8 +68,8 @@ class Scraper():
     # 2
     def forEachReturnDate(self, dep_date):
         self.everyReturnCombination = []
-        ret_date = deepcopy(self.ret_date_min)
-        while not ret_date > self.ret_date_max:
+        ret_date = deepcopy(self.config_parameters.ret_date_min)
+        while not ret_date > self.config_parameters.ret_date_max:
             self.url.setDates(dep_date.strftime('%d-%m-%Y'), ret_date.strftime('%d-%m-%Y'))
             self.scrap(self.url.getFullUrl())
             self.scrapedFlight.departure_date = dep_date
@@ -83,9 +86,13 @@ class Scraper():
     def scrap(self, fixed_url):
         self.browser.get(fixed_url)
 
-        # Wait for the search to be finished (100s)
-        element = WebDriverWait(self.browser, 100).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'search-completed')))
+        try:
+            # Wait for the search to be finished (100s)
+            element = WebDriverWait(self.browser, 30).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'search-completed')))
+        except:
+            self.browser.save_screenshot('out.png');
+            self.browser.quit()
 
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
         self.scrapedFlight.cheapest_price = int(element.text)

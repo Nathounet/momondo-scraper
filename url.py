@@ -1,16 +1,5 @@
-from ConfigParser import ConfigParser
-
 class URL():
-    def __init__(self, path_config_file):
-
-        # Get config
-        config_file = ConfigParser()
-        config_file.read(path_config_file)
-        departure = config_file.get('Airports', 'AirportOfDeparture')
-        arrival = config_file.get('Airports', 'AirportOfArrival')
-        nearby = config_file.get('Airports', 'AlsoSearchNearbyAirports')
-        direct = config_file.get('FlightOptions', 'OnlyDirect')
-
+    def __init__(self, config_parameters):
         # Fixed
         self.TripType = '&TripType=2'
         self.SegNo = '&SegNo=2'
@@ -18,12 +7,12 @@ class URL():
         self.TK = '&TK=ECO'
 
         # Set config
-        self.SO0 = '&SO0=' + departure
-        self.SD0 = '&SD0=' + arrival
-        self.SO1 = '&SO1=' + arrival
-        self.SD1 = '&SD1=' + departure
-        self.DO = '&DO=' + direct
-        self.NA = '&NA=' + nearby
+        self.SO0 = '&SO0=' + config_parameters.departure
+        self.SD0 = '&SD0=' + config_parameters.arrival
+        self.SO1 = '&SO1=' + config_parameters.arrival
+        self.SD1 = '&SD1=' + config_parameters.departure
+        self.DO = '&DO=' + config_parameters.direct
+        self.NA = '&NA=' + config_parameters.nearby
 
         # Will be set later
         self.SDP0 = '&SDP0=04-07-2017'
