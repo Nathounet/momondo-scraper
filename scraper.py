@@ -46,15 +46,10 @@ class Scraper():
     def main(self):
         start = datetime.now()
 
-#        self.forEachDepartureDate()
-
-        AutoTest(self.results_dep)
+#        self.forEachDepartureDate() # go through all date combination and scrap one by one
+        AutoTest(self.results_dep) # create results for test purpose
 
         self.createReturnResults()
-        print len(self.results_dep)
-        print len(self.results_ret)
-        print type(self.results_dep[1]), type(self.results_dep[1][1])
-        print self.results_dep[1][1].cheapest_price
         self.printResults()
         CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
 #        Plot(self.config_parameters, self.results_dep, self.results_ret)
