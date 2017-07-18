@@ -6,205 +6,253 @@ import plotly.dashboard_objs as plotdash
 
 
 class Plot():
-    def __init__(self, config_parameters):
-        # Fixed
+    def __init__(self, config_parameters, results_dep, results_ret, url_momondo):
+        self.list_url_plot = []
+        self.search_id = config_parameters.dep_date_min.strftime('%d-%m') + '_' + config_parameters.ret_date_max.strftime('%d-%m-%Y') + '_' + config_parameters.departure + '_' + config_parameters.arrival
+        self.createDataListDepartures(results_dep)
+        self.setDataDict()
+        self.createPlot()
+        self.url_dep = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+'_departures')
 
-        self.search_id = dep_date_min.strftime('%d-%m') + '_' + ret_date_max.strftime('%d-%m-%Y') + '_' + config_parameters.departure + '_' + config_parameters.arrival
+        self.createDataListReturns(results_ret)
+        self.setDataDict()
+        self.createPlot()
+        self.url_ret = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+'_returns')
 
+        #self.url_hist = self.plot(history)
 
-def plot():
-    dates = []
-    price_cheapest = []
-    price_quickest = []
-    price_bestdeal = []
-    duration_cheapest = []
-    duration_quickest = []
-    duration_bestdeal = []
-
-    for everyDepartureList in results_ret:
-        ch_price_min = min(everyDepartureList, key=attrgetter('cheapest_price'))
-        ch_duration_min = min(everyDepartureList, key=attrgetter('cheapest_duration.totalMinutes'))
-        bd_price_min = min(everyDepartureList, key=attrgetter('bestdeal_price'))
-
-        dates.append(ch_price_min.arrival.strReverse())
-        price_cheapest.append(ch_price_min.cheapest_price)
-        price_quickest.append(ch_duration_min.cheapest_price)
-        price_bestdeal.append(bd_price_min.bestdeal_price)
-        duration_cheapest.append(ch_price_min.cheapest_duration.toFloat())
-        duration_quickest.append(ch_duration_min.cheapest_duration.toFloat())
-        duration_bestdeal.append(bd_price_min.bestdeal_duration.toFloat())
-
-    price_max = max(price_cheapest + price_quickest + price_bestdeal)
-    price_min = min(price_cheapest + price_quickest + price_bestdeal)
-    price_range = [int(price_min - (price_max - price_min)/4), int(price_max + (price_max - price_min)/4)]
-
-    plotlyb.sign_in('Nathounet91', 'sMEVUzlsCFUhPNtBT3ag')
-    trace1 = {
-      "x": dates,
-      "y": price_cheapest,
-      "name": "Cheapest price",
-      "showlegend": False,
-      "text": duration_cheapest,
-      "type": "bar",
-      "xaxis": "x",
-      "yaxis": "y"
-    }
-    trace2 = {
-      "x": dates,
-      "y": price_quickest,
-      "name": "Quicker price",
-      "showlegend": False,
-      "text": duration_quickest,
-      "type": "bar",
-      "xaxis": "x",
-      "yaxis": "y"
-    }
-    trace3 = {
-      "x": dates,
-      "y": price_bestdeal,
-      "name": "BestDeal price",
-      "showlegend": False,
-      "text": duration_bestdeal,
-      "type": "bar",
-      "xaxis": "x",
-      "yaxis": "y"
-    }
-    trace4 = {
-      "x": dates,
-      "y": duration_cheapest,
-      "line": {"color": "rgb(31, 119, 180)"},
-      "mode": "lines+markers",
-      "name": "Cheapest duration",
-      "showlegend": False,
-      "text": price_cheapest,
-      "type": "scatter",
-      "xaxis": "x",
-      "yaxis": "y2"
-    }
-    trace5 = {
-      "x": dates,
-      "y": duration_quickest,
-      "line": {"color": "rgb(255, 127, 14)"},
-      "mode": "lines+markers",
-      "name": "Quicker duration",
-      "showlegend": False,
-      "text": price_quickest,
-      "type": "scatter",
-      "visible": True,
-      "xaxis": "x",
-      "yaxis": "y2"
-    }
-    trace6 = {
-      "x": dates,
-      "y": duration_bestdeal,
-      "connectgaps": False,
-      "line": {"color": "rgb(44, 160, 44)"},
-      "mode": "lines+markers",
-      "name": "BestDeal duration",
-      "showlegend": False,
-      "text": price_bestdeal,
-      "type": "scatter",
-      "xaxis": "x",
-      "yaxis": "y2",
-    }
-    data = Data([trace1, trace2, trace3, trace4, trace5, trace6])
-    layout = {
-      "autosize": True,
-      "dragmode": "zoom",
-      "hovermode": "closest",
-      "legend": {
-        "orientation": "v",
-        "traceorder": "reversed"
-      },
-      "margin": {
-        "r": 40,
-        "t": 0,
-        "b": 60,
-        "l": 65
-      },
-      "showlegend": False,
-      "xaxis": {
-        "title": "<b>Date of departure</b>",
-        "anchor": "y",
-        "autorange": True,
-        "domain": [-0.01, 1.01],
-        "gridcolor": "rgb(182, 76, 76)",
-        "mirror": False,
-        "showgrid": False,
-        "showline": False,
-        "showticklabels": True,
-        "side": "bottom",
-        "ticks": "",
-        "type": "date",
-        "zeroline": False,
-      },
-      "yaxis": {
-        "title": "<b>Price</b>",
-        "anchor": "x",
-        "autorange": False,
-        "domain": [-0.01, 0.61],
-        "fixedrange": True,
-        "range": price_range,
-        "showgrid": True,
-        "showline": False,
-        "ticks": "",
-        "type": "linear",
-        "zeroline": True,
-        "zerolinecolor": "rgba(238, 238, 238, 0.93)"
-      },
-      "yaxis2": {
-        "title": "<b>Duration</b>",
-        "anchor": "x",
-        "autorange": True,
-        "domain": [0.61, 1.01],
-        "type": "linear"
-      }
-    }
-    fig = Figure(data=data, layout=layout)
-
-    plot_url = plotlyb.plot(fig, auto_open=False, filename=search_id+'_returns')
-
-    plotoff.offline.plot(fig, auto_open=False)
-
-    dash(plot_url)
+        self.updateDashboard(url_momondo)
 
 
-def fileId_from_url(url):
-    """Return fileId from a url."""
-    index = url.find('~')
-    fileId = url[index + 1:]
-    local_id_index = fileId.find('/')
-    return fileId.replace('/', ':')
+    def createPlot(self):
+        self.createTraces()
+        self.createLayout()
+
+        # Sign in to plot.ly and update plot
+        plotlyb.sign_in('Nathounet91', 'sMEVUzlsCFUhPNtBT3ag')
+        self.figure_plot = Figure(data=self.trace_data_plot, layout=self.layout_plot)
+        #plotoff.offline.plot(fig, auto_open=False)
 
 
-def dash(url_1):
+    def createDataListDepartures(self, results_dep):
+        self.dates = []
+        self.price_cheapest = []
+        self.price_quickest = []
+        self.price_bestdeal = []
+        self.duration_cheapest = []
+        self.duration_quickest = []
+        self.duration_bestdeal = []
+
+        for list_return_flight in results_dep:
+            ch_price_min = min(list_return_flight, key=attrgetter('cheapest_price'))
+            ch_duration_min = min(list_return_flight, key=attrgetter('cheapest_duration.totalMinutes'))
+            bd_price_min = min(list_return_flight, key=attrgetter('bestdeal_price'))
+
+            self.dates.append(ch_price_min.departure_date.strftime('%Y-%m-%d')) #TODO change flight.return_date to make it possible to iterate on both result list ~flight.relevant_date
+            self.price_cheapest.append(ch_price_min.cheapest_price)
+            self.price_quickest.append(ch_duration_min.cheapest_price)
+            self.price_bestdeal.append(bd_price_min.bestdeal_price)
+            self.duration_cheapest.append(ch_price_min.cheapest_duration.toFloat())
+            self.duration_quickest.append(ch_duration_min.cheapest_duration.toFloat())
+            self.duration_bestdeal.append(bd_price_min.bestdeal_duration.toFloat())
+
+        price_max = max(self.price_cheapest + self.price_quickest + self.price_bestdeal)
+        price_min = min(self.price_cheapest + self.price_quickest + self.price_bestdeal)
+        self.price_range = [int(price_min - (price_max - price_min)/4), int(price_max + (price_max - price_min)/4)]
 
 
-    my_dboard = plotdash.Dashboard()
-    my_dboard.get_preview()
+    def createDataListReturns(self, results_ret):
+        self.dates = []
+        self.price_cheapest = []
+        self.price_quickest = []
+        self.price_bestdeal = []
+        self.duration_cheapest = []
+        self.duration_quickest = []
+        self.duration_bestdeal = []
+
+        for list_departure_flight in results_ret:
+            ch_price_min = min(list_departure_flight, key=attrgetter('cheapest_price'))
+            ch_duration_min = min(list_departure_flight, key=attrgetter('cheapest_duration.totalMinutes'))
+            bd_price_min = min(list_departure_flight, key=attrgetter('bestdeal_price'))
+
+            self.dates.append(ch_price_min.return_date.strftime('%Y-%m-%d')) #TODO change flight.return_date to make it possible to iterate on both result list ~flight.relevant_date
+            self.price_cheapest.append(ch_price_min.cheapest_price)
+            self.price_quickest.append(ch_duration_min.cheapest_price)
+            self.price_bestdeal.append(bd_price_min.bestdeal_price)
+            self.duration_cheapest.append(ch_price_min.cheapest_duration.toFloat())
+            self.duration_quickest.append(ch_duration_min.cheapest_duration.toFloat())
+            self.duration_bestdeal.append(bd_price_min.bestdeal_duration.toFloat())
+
+        price_max = max(self.price_cheapest + self.price_quickest + self.price_bestdeal)
+        price_min = min(self.price_cheapest + self.price_quickest + self.price_bestdeal)
+        self.price_range = [int(price_min - (price_max - price_min)/4), int(price_max + (price_max - price_min)/4)]
 
 
-    fileId_1 = fileId_from_url(url_1)
-    #fileId_2 = fileId_from_url(url_2)
-    test = url_1.split('~')[1].replace('/', ':')
-    print fileId_1, test
+    def setDataDict(self):
+        self.data_dict = {}
+        self.data_dict['dates'] = self.dates
+        self.data_dict['price_cheapest'] = self.price_cheapest
+        self.data_dict['price_quickest'] = self.price_quickest
+        self.data_dict['price_bestdeal'] = self.price_bestdeal
+        self.data_dict['duration_cheapest'] = self.duration_cheapest
+        self.data_dict['duration_quickest'] = self.duration_quickest
+        self.data_dict['duration_bestdeal'] = self.duration_bestdeal
+        self.data_dict['price_range'] = self.price_range
 
-    box_a = {
-        'type': 'box',
-        'boxType': 'plot',
-        'fileId': fileId_1,
-        'title': 'scatter-for-dashboard'
-    }
 
-    #box_c = {
-    #    'type': 'box',
-    #    'boxType': 'plot',
-    #    'fileId': fileId_2,
-    #    'title': 'box-for-dashboard',
-    #    'shareKey': sharekey_from_url(url_2)
-    #}
+    def createTraces(self):
+        price_ch = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['price_cheapest'],
+          "name": "Cheapest price",
+          "showlegend": False,
+          "text": self.data_dict['duration_cheapest'],
+          "type": "bar",
+          "xaxis": "x",
+          "yaxis": "y"
+        }
+        price_qu = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['price_quickest'],
+          "name": "Quicker price",
+          "showlegend": False,
+          "text": self.data_dict['duration_quickest'],
+          "type": "bar",
+          "xaxis": "x",
+          "yaxis": "y"
+        }
+        price_bd = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['price_bestdeal'],
+          "name": "BestDeal price",
+          "showlegend": False,
+          "text": self.data_dict['duration_bestdeal'],
+          "type": "bar",
+          "xaxis": "x",
+          "yaxis": "y"
+        }
+        duration_ch = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['duration_cheapest'],
+          "line": {"color": "rgb(31, 119, 180)"},
+          "mode": "lines+markers",
+          "name": "Cheapest duration",
+          "showlegend": False,
+          "text": self.data_dict['price_cheapest'],
+          "type": "scatter",
+          "xaxis": "x",
+          "yaxis": "y2"
+        }
+        duration_qu = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['duration_quickest'],
+          "line": {"color": "rgb(255, 127, 14)"},
+          "mode": "lines+markers",
+          "name": "Quicker duration",
+          "showlegend": False,
+          "text": self.data_dict['price_quickest'],
+          "type": "scatter",
+          "visible": True,
+          "xaxis": "x",
+          "yaxis": "y2"
+        }
+        duration_bd = {
+          "x": self.data_dict['dates'],
+          "y": self.data_dict['duration_bestdeal'],
+          "connectgaps": False,
+          "line": {"color": "rgb(44, 160, 44)"},
+          "mode": "lines+markers",
+          "name": "BestDeal duration",
+          "showlegend": False,
+          "text": self.data_dict['price_bestdeal'],
+          "type": "scatter",
+          "xaxis": "x",
+          "yaxis": "y2",
+        }
+        self.trace_data_plot = Data([price_ch, price_qu, price_bd, duration_ch, duration_qu, duration_bd])
 
-    my_dboard.insert(box_a)
-    my_dboard.get_preview()
 
-    plotdash.upload(my_dboard, 'My First Dashboard with Python')
+    def createLayout(self):
+        self.layout_plot = {
+          "autosize": True,
+          "dragmode": "zoom",
+          "hovermode": "closest",
+          "legend": {
+            "orientation": "v",
+            "traceorder": "reversed"
+          },
+          "margin": {
+            "r": 40,
+            "t": 0,
+            "b": 60,
+            "l": 65
+          },
+          "showlegend": False,
+          "xaxis": {
+            "title": "<b>Date of departure</b>",
+            "anchor": "y",
+            "autorange": True,
+            "domain": [-0.01, 1.01],
+            "gridcolor": "rgb(182, 76, 76)",
+            "mirror": False,
+            "showgrid": False,
+            "showline": False,
+            "showticklabels": True,
+            "side": "bottom",
+            "ticks": "",
+            "type": "date",
+            "zeroline": False,
+          },
+          "yaxis": {
+            "title": "<b>Price</b>",
+            "anchor": "x",
+            "autorange": False,
+            "domain": [-0.01, 0.61],
+            "fixedrange": True,
+            "range": self.data_dict['price_range'],
+            "showgrid": True,
+            "showline": False,
+            "ticks": "",
+            "type": "linear",
+            "zeroline": True,
+            "zerolinecolor": "rgba(238, 238, 238, 0.93)"
+          },
+          "yaxis2": {
+            "title": "<b>Duration</b>",
+            "anchor": "x",
+            "autorange": True,
+            "domain": [0.61, 1.01],
+            "type": "linear"
+          }
+        }
+
+
+    def updateDashboard(self, url_momondo):
+        dboard = plotdash.Dashboard()
+
+        fileId_dep = self.url_dep.split('~')[1].replace('/', ':')
+        box_dep = {
+            'type': 'box',
+            'boxType': 'plot',
+            'fileId': fileId_dep,
+            'title': 'Departure flights'
+        }
+        dboard.insert(box_dep)
+
+        fileId_ret = self.url_ret.split('~')[1].replace('/', ':')
+        box_ret = {
+            'type': 'box',
+            'boxType': 'plot',
+            'fileId': fileId_ret,
+            'title': 'Return flights'
+        }
+        dboard.insert(box_ret, 'right', 1)
+        
+        dboard['layout']['size'] = 520
+        dboard['layout']['sizeUnit'] = 'px'
+        dboard['settings']['title'] = 'Scrapped flights from '+self.search_id.split('_')[-2]+' to '+self.search_id.split('_')[-1]
+        dboard['settings']['logoUrl'] = 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Momondo_A-S_logo.svg/1280px-Momondo_A-S_logo.svg.png'
+        dboard['settings']['links'] = []
+        dboard['settings']['links'].append({'title': 'See more on Momondo', 'url': url_momondo})
+
+        plotlyb.dashboard_ops.upload(dboard, filename=self.search_id+'_dashboard')

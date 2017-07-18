@@ -22,10 +22,10 @@ class CsvWriter():
                 'BestDeal.price', 'BestDeal.duration'
               ]
         history_csv_file_writer.writerow(row)
-        for everyReturnList in results_dep:
-            ch_price_min = min(everyReturnList, key=attrgetter('cheapest_price'))
-            ch_duration_min = min(everyReturnList, key=attrgetter('cheapest_duration.totalMinutes'))
-            bd_price_min = min(everyReturnList, key=attrgetter('bestdeal_price'))
+        for list_return_flight in results_dep:
+            ch_price_min = min(list_return_flight, key=attrgetter('cheapest_price'))
+            ch_duration_min = min(list_return_flight, key=attrgetter('cheapest_duration.totalMinutes'))
+            bd_price_min = min(list_return_flight, key=attrgetter('bestdeal_price'))
             #print "{", ch_price_min.departure_date, "} ", "[Cheapest] price", ch_price_min.cheapest_price, "duration", ch_duration_min.cheapest_duration, "[BestDeal] price", bd_price_min.bestdeal_price
             row = [ datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ch_price_min.departure_date.strftime('%Y-%m-%d'),
                     ch_price_min.cheapest_price, ch_price_min.cheapest_duration.toFloat(),
@@ -45,10 +45,10 @@ class CsvWriter():
                 'BestDeal.price', 'BestDeal.duration'
               ]
         history_csv_file_writer.writerow(row)
-        for everyDepartureList in results_ret:
-            ch_price_min = min(everyDepartureList, key=attrgetter('cheapest_price'))
-            ch_duration_min = min(everyDepartureList, key=attrgetter('cheapest_duration.totalMinutes'))
-            bd_price_min = min(everyDepartureList, key=attrgetter('bestdeal_price'))
+        for list_departure_flight in results_ret:
+            ch_price_min = min(list_departure_flight, key=attrgetter('cheapest_price'))
+            ch_duration_min = min(list_departure_flight, key=attrgetter('cheapest_duration.totalMinutes'))
+            bd_price_min = min(list_departure_flight, key=attrgetter('bestdeal_price'))
             #print "{", ch_price_min.departure_date, "} ", "[Cheapest] price", ch_price_min.cheapest_price, "duration", ch_duration_min.cheapest_duration, "[BestDeal] price", bd_price_min.bestdeal_price
             row = [ datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ch_price_min.return_date.strftime('%Y-%m-%d'),
                     ch_price_min.cheapest_price, ch_price_min.cheapest_duration.toFloat(),

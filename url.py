@@ -15,8 +15,8 @@ class URL():
         self.NA = '&NA=' + config_parameters.nearby
 
         # Will be set later
-        self.SDP0 = '&SDP0=04-07-2017'
-        self.SDP1 = '&SDP1=28-03-1994'
+        self.SDP0 = '&SDP0=' + config_parameters.dep_date_min.strftime('%d-%m-%Y')
+        self.SDP1 = '&SDP1=' + config_parameters.ret_date_max.strftime('%d-%m-%Y')
 
     def __repr__(self):
         return 'URL '+str(self)

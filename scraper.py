@@ -17,7 +17,7 @@ from config import Config
 from flight import Flight
 from csvwriter import CsvWriter
 from autotest import AutoTest
-#from plot import Plot
+from plot import Plot
 
 
 class Scraper():
@@ -28,7 +28,7 @@ class Scraper():
         self.scrapedFlight = Flight()
         self.config_parameters = Config(path_config_file)
         self.url = URL(self.config_parameters)
-        self.initWebdriver(path_to_webdriver)
+#        self.initWebdriver(path_to_webdriver)
 
 
     def initWebdriver(self, path_to_webdriver):
@@ -50,9 +50,9 @@ class Scraper():
         AutoTest(self.results_dep) # create results for test purpose
 
         self.createReturnResults()
-        self.printResults()
-        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
-#        Plot(self.config_parameters, self.results_dep, self.results_ret)
+#        self.printResults()
+#        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
+        Plot(self.config_parameters, self.results_dep, self.results_ret, self.url.getFullUrl())
 
         end = datetime.now()
 
