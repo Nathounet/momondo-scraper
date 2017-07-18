@@ -208,7 +208,7 @@ class Plot():
             "traceorder": "reversed"
           },
           "margin": {
-            "r": 40,
+            "r": 20,
             "t": 0,
             "b": 60,
             "l": 65
