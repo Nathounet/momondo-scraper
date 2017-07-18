@@ -3,35 +3,56 @@ from plotly.graph_objs import *
 import plotly.plotly as plotlyb
 import plotly.offline as plotoff
 import plotly.dashboard_objs as plotdash
+import plotly.exceptions as plotex
 
 
 class Plot():
     def __init__(self, config_parameters, results_dep, results_ret, url_momondo):
-        self.list_url_plot = []
+        self.account = True
         self.search_id = config_parameters.dep_date_min.strftime('%d-%m') + '_' + config_parameters.ret_date_max.strftime('%d-%m-%Y') + '_' + config_parameters.departure + '_' + config_parameters.arrival
+        self.userSignIn()
+
         self.createDataListDepartures(results_dep)
         self.setDataDict()
-        self.createPlot()
-        self.url_dep = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+'_departures')
+        self.createFigure()
+        self.url_dep = self.sendPlot('_departures')
 
         self.createDataListReturns(results_ret)
         self.setDataDict()
-        self.createPlot()
-        self.url_ret = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+'_returns')
+        self.createFigure()
+        self.url_ret = self.sendPlot('_returns')
 
-        #self.url_hist = self.plot(history)
+        #self.url_hist = self.plot(history) #TODO: add cheapest fare history below both, from csv
 
         self.updateDashboard(url_momondo)
 
 
-    def createPlot(self):
+    def userSignIn(self):
+        if self.account == True:
+            plotlyb.sign_in('Nathounet91', 'sMEVUzlsCFUhPNtBT3ag')
+            print 'Signed in as Nathounet91'
+        else:
+            plotlyb.sign_in('testScrapper', 'nn4kOOGlmvhfkKGzAoyJ')
+            print 'Signed in as testScrapper'
+        self.account = not self.account
+
+
+    def createFigure(self):
         self.createTraces()
         self.createLayout()
 
-        # Sign in to plot.ly and update plot
-        plotlyb.sign_in('Nathounet91', 'sMEVUzlsCFUhPNtBT3ag')
         self.figure_plot = Figure(data=self.trace_data_plot, layout=self.layout_plot)
         #plotoff.offline.plot(fig, auto_open=False)
+
+
+    def sendPlot(self, way):
+        try:
+            url = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+way)
+        except plotex.PlotlyRequestError:
+            print 'plot.ly API calls reached, switching account'
+            self.userSignIn()
+            url = plotlyb.plot(self.figure_plot, auto_open=False, filename=self.search_id+way)
+        return url
 
 
     def createDataListDepartures(self, results_dep):
@@ -247,7 +268,7 @@ class Plot():
             'title': 'Return flights'
         }
         dboard.insert(box_ret, 'right', 1)
-        
+
         dboard['layout']['size'] = 520
         dboard['layout']['sizeUnit'] = 'px'
         dboard['settings']['title'] = 'Scrapped flights from '+self.search_id.split('_')[-2]+' to '+self.search_id.split('_')[-1]
