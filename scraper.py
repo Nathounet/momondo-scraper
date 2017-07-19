@@ -46,8 +46,8 @@ class Scraper():
     def main(self):
         start = datetime.now()
 
-        #self.forEachDepartureDate() # go through all date combination and scrap one by one
-        AutoTest(self.results_dep) # create results for test purpose
+        self.forEachDepartureDate() # go through all date combination and scrap one by one
+        #AutoTest(self.results_dep) # create results for test purpose
 
         self.createReturnResults()
         self.printResults()
