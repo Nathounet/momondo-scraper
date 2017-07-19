@@ -85,22 +85,11 @@ class Plot():
 
 
     def createTraces(self, way):
+        # Sign for hover
         if way == 'Departure':
             sign = '< '
         else: #way == 'Return':
             sign = '> '
-
-        from pprint import pprint
-        test = zip(self.data_dict['bestdeal']['date_otherway'], self.data_dict['bestdeal']['duration'])
-        pprint(test)
-        print type(test), type(test[1]), test[1]
-        test2 = [sign+str(info).replace('\'', '').replace('(', '') for info in zip(self.data_dict['bestdeal']['date_otherway'], self.data_dict['bestdeal']['duration'])]
-        print type(test2), type(test2[1]), test2[1]
-
-        #list_info_other_way = zip(self.data_dict['bestdeal']['date_otherway'], self.data_dict['bestdeal']['duration'])
-
-
-
 
         price_ch = {
           "x": self.data_dict['cheapest']['date'],

@@ -28,7 +28,7 @@ class Scraper():
         self.scrapedFlight = Flight()
         self.config_parameters = Config(path_config_file)
         self.url = URL(self.config_parameters)
-#        self.initWebdriver(path_to_webdriver)
+        self.initWebdriver(path_to_webdriver)
 
 
     def initWebdriver(self, path_to_webdriver):
@@ -46,12 +46,12 @@ class Scraper():
     def main(self):
         start = datetime.now()
 
-#        self.forEachDepartureDate() # go through all date combination and scrap one by one
+        #self.forEachDepartureDate() # go through all date combination and scrap one by one
         AutoTest(self.results_dep) # create results for test purpose
 
         self.createReturnResults()
-#        self.printResults()
-#        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
+        self.printResults()
+        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
         Plot(self.config_parameters, self.results_dep, self.results_ret, self.url.getFullUrl())
 
         end = datetime.now()
@@ -63,7 +63,7 @@ class Scraper():
         minutes = int(seconds / 60)
         seconds = seconds - minutes*60
         print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
-#        self.browser.quit()
+        self.browser.quit()
 
     # 1
     def forEachDepartureDate(self):
