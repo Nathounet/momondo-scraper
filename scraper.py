@@ -63,7 +63,7 @@ class Scraper():
         minutes = int(seconds / 60)
         seconds = seconds - minutes*60
         print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
-        self.browser.quit()
+#        self.browser.quit()
 
     # 1
     def forEachDepartureDate(self):
@@ -81,8 +81,10 @@ class Scraper():
         while not ret_date > self.config_parameters.ret_date_max:
             self.url.setDates(dep_date.strftime('%d-%m-%Y'), ret_date.strftime('%d-%m-%Y'))
             self.scrap(self.url.getFullUrl())
-            self.scrapedFlight.departure_date = dep_date
-            self.scrapedFlight.return_date = ret_date
+            self.scrapedFlight.date_departure = dep_date
+            self.scrapedFlight.date_this_way = self.scrapedFlight.date_departure # here this way = departure
+            self.scrapedFlight.date_return = ret_date
+            self.scrapedFlight.date_other_way = self.scrapedFlight.date_return
             print self.scrapedFlight
             self.everyReturnCombination.append(deepcopy(self.scrapedFlight))
             ret_date += timedelta(days=1)
@@ -116,11 +118,14 @@ class Scraper():
 
     def createReturnResults(self):
         # Reverse list order to sort returns flights
-        for nb_dep, everyReturnList in enumerate(self.results_dep):
-            for nb_ret, everyReturnFlight in enumerate(everyReturnList):
+        for nb_dep, list_return_flight in enumerate(self.results_dep):
+            for nb_ret, return_flight in enumerate(list_return_flight):
                 if nb_dep == 0:
                     self.results_ret.append([])
-                self.results_ret[nb_ret].append(deepcopy(everyReturnFlight))
+                self.results_ret[nb_ret].append(deepcopy(return_flight))
+                # dates must be inverted
+                self.results_ret[nb_ret][nb_dep].date_this_way = self.results_ret[nb_ret][nb_dep].date_return
+                self.results_ret[nb_ret][nb_dep].date_other_way = self.results_ret[nb_ret][nb_dep].date_departure
 
 
     def printResults(self):
