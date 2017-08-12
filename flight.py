@@ -1,3 +1,5 @@
+from shorttime import Time
+
 class Flight():
     def __init__(self):
         self.date_departure = None
@@ -5,9 +7,9 @@ class Flight():
         self.date_this_way = None # Points on either date_departure or date_return
         self.date_other_way = None # Points on either date_return or date_departure
         self.cheapest_price = 0
-        self.cheapest_duration = None
+        self.cheapest_duration = Time("1h23m") #default
         self.bestdeal_price = 0
-        self.bestdeal_duration = None
+        self.bestdeal_duration = Time("1h23m") #default
 
     def __repr__(self):
         return 'Flight '+str(self)
