@@ -88,8 +88,8 @@ class Scraper():
             print self.scrapedFlight
             self.everyReturnCombination.append(deepcopy(self.scrapedFlight))
             ret_date += timedelta(days=1)
-            # Wait between 5 and 9.7s between each search to make it less boty
-            seconds = 5 + (random() * 4) + (random() * 0.7)
+            # Wait between 5 and 13.3s between each search to make it less boty
+            seconds = 5 + (random() * 5) + (random() * 1.3)
             print 'Sleeping for %.2f seconds...' % (seconds)
             sleep(seconds)
 
