@@ -16,6 +16,7 @@ from scraper import Scraper
 from csvwriter import CsvWriter
 from autotest import AutoTest
 
+#TODO: handle no result, block page, 403 forbidden error with empty Flight that will not be used in the final results
 
 class Controller():
     def __init__(self, path_config_file, path_to_webdriver):
@@ -73,6 +74,7 @@ class Controller():
             worker.setDaemon(False)
             worker.start()
         self.date_queue.join()
+        print "All date combinations processed or in-process, waiting for threads to exit"
 
         main_thread = threading.currentThread()
         for worker in threading.enumerate():

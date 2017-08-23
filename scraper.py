@@ -34,7 +34,7 @@ class Scraper():
     def processDateCombination(self, results_dep, results_lock, date_queue, exit_flag):
         # Wait between 0 and 17.3s before first search
         delay = (random() * 10) + (random() * 7.3)
-        print '%s Sleeping for %5.2f seconds...' % (current_thread().name, delay)
+        print '%s Sleeping for %2.0f seconds...' % (current_thread().name, delay)
         exit_flag.wait(timeout=delay)
 
         while not date_queue.empty():
@@ -49,12 +49,11 @@ class Scraper():
             date_queue.task_done()
 
             if date_queue.empty():
-                print "All date combinations processed, exiting threads"
                 exit_flag.set()
             else:
-                # Wait between 5 and 13.3s between each search to make it less boty
-                delay = 5 + (random() * 5) + (random() * 1.3)
-                print '%s Sleeping for %.2f seconds...' % (current_thread().name, delay)
+                # Wait between 11 and 21.3s between each search to make it less boty
+                delay = 11 + (random() * 7) + (random() * 3.3)
+                print '%s Sleeping for %2.0f seconds...' % (current_thread().name, delay)
                 exit_flag.wait(timeout=delay)
 
         exit_flag.set()
@@ -80,9 +79,11 @@ class Scraper():
             element = WebDriverWait(self.browser, 100).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'search-completed')))
         except:
-            self.browser.save_screenshot('out.png');
-            self.browser.quit()
-            assert 2==1
+            print "TIMEOUT ERROR"
+            return scrapedFlight
+            #self.browser.save_screenshot('out.png');
+            #self.browser.quit()
+            #assert 2==1
 
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
         scrapedFlight.cheapest_price = int(element.text)
