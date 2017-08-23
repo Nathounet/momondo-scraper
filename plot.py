@@ -1,3 +1,4 @@
+### Libraries
 from operator import attrgetter
 from plotly.graph_objs import *
 import plotly.plotly as plotlyb
@@ -5,11 +6,18 @@ import plotly.offline as plotoff
 import plotly.dashboard_objs as plotdash
 import plotly.exceptions as plotex
 
+### Custom modules
+from url import URL
+
+#TODO: create and display average price
 
 class Plot():
-    def __init__(self, config_parameters, results_dep, results_ret, url_momondo):
+    def __init__(self, config_parameters, results_dep, results_ret):
         self.account = True
-        self.search_id = config_parameters.dep_date_min.strftime('%d-%m') + '_' + config_parameters.ret_date_max.strftime('%d-%m-%Y') + '_' + config_parameters.departure + '_' + config_parameters.arrival
+        self.search_id = (config_parameters.dep_date_min.strftime('%d-%m')
+                        + '_' + config_parameters.ret_date_max.strftime('%d-%m-%Y')
+                        + '_' + config_parameters.departure
+                        + '_' + config_parameters.arrival)
         self.userSignIn()
 
         self.createDataList(results_dep)
@@ -22,7 +30,11 @@ class Plot():
 
         #self.url_hist = self.plot(history) #TODO: add cheapest fare history below both, from csv
 
-        self.updateDashboard(url_momondo)
+        url_momondo = URL(config_parameters)
+        url_momondo.setDates(
+                    config_parameters.dep_date_min.strftime('%d-%m-%Y'),
+                    config_parameters.ret_date_max.strftime('%d-%m-%Y'))
+        self.updateDashboard(url_momondo.getFullUrl())
 
 
     def userSignIn(self):

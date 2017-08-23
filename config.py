@@ -26,5 +26,6 @@ class Config():
             self.arrival = config_file.get('Airports', 'AirportOfArrival')
             self.nearby = config_file.get('Airports', 'AlsoSearchNearbyAirports')
             self.direct = config_file.get('FlightOptions', 'OnlyDirect')
+            self.max_threads = int(config_file.get('MultiThreading', 'NumberOfBrowser'))
 
 #TODO: Improve error handling: add exceptions

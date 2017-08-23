@@ -25,7 +25,6 @@ class URL():
         return self.getFullUrl()
 
     def setDates(self, dep_date, ret_date):
-        print '%s > %s' % (dep_date, ret_date)
         self.SDP0 = '&SDP0=' + dep_date
         self.SDP1 = '&SDP1=' + ret_date
 

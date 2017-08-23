@@ -1,33 +1,21 @@
 ### Libraries
 from time import sleep
-from copy import deepcopy
-from pprint import pprint
+from Queue import Queue
 from random import random
-from datetime import datetime, timedelta
 from selenium import webdriver
+from threading import current_thread
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-
 ### Custom modules
 from url import URL
 from shorttime import Time
-from config import Config
 from flight import Flight
-from csvwriter import CsvWriter
-from autotest import AutoTest
-from plot import Plot
-
 
 class Scraper():
-    def __init__(self, path_config_file, path_to_webdriver):
-        self.results_dep = []
-        self.results_ret = []
-        self.everyReturnCombination = []
-        self.scrapedFlight = Flight()
-        self.config_parameters = Config(path_config_file)
-        self.url = URL(self.config_parameters)
+    def __init__(self, config_parameters, path_to_webdriver):
+        self.url = URL(config_parameters)
         self.initWebdriver(path_to_webdriver)
 
 
@@ -43,58 +31,48 @@ class Scraper():
         self.browser.set_window_size(400, 700)
 
 
-    def main(self):
-        start = datetime.now()
+    def processDateCombination(self, results_dep, results_lock, date_queue, exit_flag):
+        # Wait between 0 and 17.3s before first search
+        delay = (random() * 10) + (random() * 7.3)
+        print '%s Sleeping for %5.2f seconds...' % (current_thread().name, delay)
+        exit_flag.wait(timeout=delay)
 
-        self.forEachDepartureDate() # go through all date combination and scrap one by one
-        #AutoTest(self.results_dep) # create results for test purpose
+        while not date_queue.empty():
+            dep_date, ret_date = date_queue.get()
 
-        self.createReturnResults()
-        self.printResults()
-        CsvWriter(self.config_parameters, self.results_dep, self.results_ret)
-        Plot(self.config_parameters, self.results_dep, self.results_ret, self.url.getFullUrl())
+            scrapedFlight = self.scrap(dep_date, ret_date)
+            print current_thread().name, scrapedFlight
 
-        end = datetime.now()
+            with results_lock:
+                results_dep.append(scrapedFlight)
+                print "Processed: %2d / Remaining: %2d" % (len(results_dep), date_queue.qsize())
+            date_queue.task_done()
 
-        time_elapsed = end - start
-        seconds = int(time_elapsed.total_seconds())
-        hours = int(seconds / 3600)
-        seconds = seconds - hours*3600
-        minutes = int(seconds / 60)
-        seconds = seconds - minutes*60
-        print "\nFinished in %dh %dm %ds\n" % (hours, minutes, seconds)
+            if date_queue.empty():
+                print "All date combinations processed, exiting threads"
+                exit_flag.set()
+            else:
+                # Wait between 5 and 13.3s between each search to make it less boty
+                delay = 5 + (random() * 5) + (random() * 1.3)
+                print '%s Sleeping for %.2f seconds...' % (current_thread().name, delay)
+                exit_flag.wait(timeout=delay)
+
+        exit_flag.set()
         self.browser.quit()
 
-    # 1
-    def forEachDepartureDate(self):
-        dep_date = deepcopy(self.config_parameters.dep_date_min)
-        while not dep_date > self.config_parameters.dep_date_max:
-            self.forEachReturnDate(dep_date)
-            self.results_dep.append(deepcopy(self.everyReturnCombination))
-            pprint(self.everyReturnCombination)
-            dep_date += timedelta(days=1)
 
-    # 2
-    def forEachReturnDate(self, dep_date):
-        self.everyReturnCombination = []
-        ret_date = deepcopy(self.config_parameters.ret_date_min)
-        while not ret_date > self.config_parameters.ret_date_max:
-            self.url.setDates(dep_date.strftime('%d-%m-%Y'), ret_date.strftime('%d-%m-%Y'))
-            self.scrap(self.url.getFullUrl())
-            self.scrapedFlight.date_departure = dep_date
-            self.scrapedFlight.date_this_way = self.scrapedFlight.date_departure # here this way = departure
-            self.scrapedFlight.date_return = ret_date
-            self.scrapedFlight.date_other_way = self.scrapedFlight.date_return
-            print self.scrapedFlight
-            self.everyReturnCombination.append(deepcopy(self.scrapedFlight))
-            ret_date += timedelta(days=1)
-            # Wait between 5 and 13.3s between each search to make it less boty
-            seconds = 5 + (random() * 5) + (random() * 1.3)
-            print 'Sleeping for %.2f seconds...' % (seconds)
-            sleep(seconds)
+    def scrap(self, dep_date, ret_date):
+        self.url.setDates(dep_date.strftime('%d-%m-%Y'), ret_date.strftime('%d-%m-%Y'))
+        scrapedFlight = self.loadPage(self.url.getFullUrl())
+        scrapedFlight.date_departure = dep_date
+        scrapedFlight.date_this_way = dep_date # here this way = departure
+        scrapedFlight.date_return = ret_date
+        scrapedFlight.date_other_way = ret_date
+        return scrapedFlight
 
-    # 3
-    def scrap(self, fixed_url):
+
+    def loadPage(self, fixed_url):
+        scrapedFlight = Flight()
         self.browser.get(fixed_url)
 
         try:
@@ -107,35 +85,11 @@ class Scraper():
             assert 2==1
 
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[2]/span[1]')
-        self.scrapedFlight.cheapest_price = int(element.text)
+        scrapedFlight.cheapest_price = int(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="flight-tickets-sortbar-cheapest"]/div/span[3]')
-        self.scrapedFlight.cheapest_duration = Time(element.text)
+        scrapedFlight.cheapest_duration = Time(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[2]/span[1]')
-        self.scrapedFlight.bestdeal_price = int(element.text)
+        scrapedFlight.bestdeal_price = int(element.text)
         element = self.browser.find_element_by_xpath('//*[@id="uiBestDealTab"]/span[3]')
-        self.scrapedFlight.bestdeal_duration = Time(element.text)
-
-
-    def createReturnResults(self):
-        # Reverse list order to sort returns flights
-        for nb_dep, list_return_flight in enumerate(self.results_dep):
-            for nb_ret, return_flight in enumerate(list_return_flight):
-                if nb_dep == 0:
-                    self.results_ret.append([])
-                self.results_ret[nb_ret].append(deepcopy(return_flight))
-                # dates must be inverted
-                self.results_ret[nb_ret][nb_dep].date_this_way = self.results_ret[nb_ret][nb_dep].date_return
-                self.results_ret[nb_ret][nb_dep].date_other_way = self.results_ret[nb_ret][nb_dep].date_departure
-
-
-    def printResults(self):
-        print '\n######## RESULTS ########'
-        print '--- DEPARTURES ---'
-        pprint(self.results_dep)
-        print '\n--- RETURNS ---'
-        pprint(self.results_ret)
-
-#TODO+ Find lowest price in Cheapest and lowest duration in BestDeal for every departure date and every return date
-#       Create a list for each (4 lists: cheapest_departure, shortest_departure, cheapest_return, shortest_return)
-#       Plot cheapest and shortest on same graph showing both price and duration for cheapest_ and shortest_
-#TODO- Make the scrapping part a thread to process multiple date at same time (might need multiple webdriver instances)
+        scrapedFlight.bestdeal_duration = Time(element.text)
+        return scrapedFlight

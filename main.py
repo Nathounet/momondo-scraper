@@ -17,14 +17,14 @@
 import platform, sys
 
 ### Custom modules
-from scraper import Scraper
+from controller import Controller
 
 ### Parameters
 path_config_file = './search.conf'
 path_to_webdriver_dir = './webdriver/' # ends with /
 name_of_webdriver = 'chromedriver' # chromedriver OR phantomjs
-path_to_webdriver = ''
 
+path_to_webdriver = ''
 if platform.system() == 'Darwin':
     path_to_webdriver = path_to_webdriver_dir + name_of_webdriver
 elif platform.system() == 'Windows':
@@ -33,6 +33,6 @@ else:
     sys.exit('Unsupported platform yet')
 
 if "__main__" == __name__:
-    momondo_scraper = Scraper(path_config_file, path_to_webdriver)
+    momondo_scraper = Controller(path_config_file, path_to_webdriver)
     momondo_scraper.main()
     quit()
