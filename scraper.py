@@ -45,7 +45,7 @@ class Scraper():
 
             with results_lock:
                 results_dep.append(scrapedFlight)
-                print "Processed: %2d / Remaining: %2d" % (len(results_dep), date_queue.qsize())
+                print "Flights processed: %2d / Flights in queue: %2d" % (len(results_dep), date_queue.qsize())
             date_queue.task_done()
 
             if date_queue.empty():

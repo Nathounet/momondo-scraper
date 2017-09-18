@@ -72,6 +72,7 @@ class Plot():
         self.data_dict['bestdeal'] = {'date':[], 'date_otherway':[], 'price':[], 'duration':[]}
 
         for list_flight in results:
+            #TODO: when multiple Flights have the same lowest price return the one with the minimum duration
             ch_price_min = min(list_flight, key=attrgetter('cheapest_price'))
             ch_duration_min = min(list_flight, key=attrgetter('cheapest_duration.totalMinutes'))
             bd_price_min = min(list_flight, key=attrgetter('bestdeal_price'))

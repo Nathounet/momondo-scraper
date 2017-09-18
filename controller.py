@@ -28,6 +28,7 @@ class Controller():
 
     def main(self):
         start = datetime.now()
+        print "Searching for flights from %s to %s" % (self.config_parameters.departure, self.config_parameters.arrival)
 
         self.createDateDivision()
         self.createThreads()
