@@ -66,7 +66,7 @@ class Controller():
     def createThreads(self):
         results_lock = threading.Lock()
         exit_flag = threading.Event()
-        print "Starting the automated browsers"
+        print "Starting the %d automated browsers" % (num_thread)
         for num_thread in range(self.config_parameters.max_threads):
             scraper = Scraper(self.config_parameters, self.path_to_webdriver)
             worker = threading.Thread(target=scraper.processDateCombination,

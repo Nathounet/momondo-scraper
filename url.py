@@ -29,7 +29,7 @@ class URL():
         self.SDP1 = '&SDP1=' + ret_date
 
     def getFullUrl(self):
-        url = 'https://www.momondo.fr/flightsearch?Search=true'
+        url = 'https://www.momondo.fr/flightsearch/?Search=true'
         url += self.TripType + self.SegNo + self.SO0 + self.SD0 + self.SDP0 + self.SO1 + self.SD1 + self.SDP1 + self.AD + self.TK + self.DO + self.NA
         return url
 
